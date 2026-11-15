@@ -1,7 +1,7 @@
 
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { products } from "../data/womenProducts";
+import { useProductCatalog } from "../context/ProductContext";
 import "./Women.css";
 
 const ITEMS_PER_PAGE = 16;
@@ -11,6 +11,12 @@ function formatPrice(price) {
 }
 
 export default function Women() {
+  const {
+    products: catalogProducts,
+    loading: catalogLoading,
+    error: catalogError,
+  } = useProductCatalog();
+  const products = catalogProducts.filter((product) => product.category === "women");
   const [availability, setAvailability] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const [page, setPage] = useState(1);
@@ -29,7 +35,7 @@ export default function Women() {
     if (sortBy === "name") result.sort((a, b) => a.name.localeCompare(b.name));
 
     return result;
-  }, [availability, sortBy]);
+  }, [availability, sortBy, products]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
   const currentPage = Math.min(page, totalPages);
@@ -41,6 +47,8 @@ export default function Women() {
   return (
     <main className="women-collection">
       <h1 className="women-title">Women's Perfumes</h1>
+      {catalogLoading && <p role="status">Loading products...</p>}
+      {catalogError && <p role="alert">{catalogError}</p>}
 
       <div className="women-toolbar">
         <div className="women-filters">
@@ -100,8 +108,8 @@ export default function Women() {
         {visibleProducts.map((product) => (
           <Link
             className="women-product-card"
-            key={product.id}
-            to={`/product/women-${product.id}`}
+            key={product.routeId}
+            to={`/product/${product.routeId}`}
             aria-label={`View ${product.name}`}
           >
             <div className="women-product-image">

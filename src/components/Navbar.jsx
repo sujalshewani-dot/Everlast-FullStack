@@ -1,8 +1,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { allProducts } from "../data/allProducts";
 import { useCart } from "../context/CartContext";
+import { useProductCatalog } from "../context/ProductContext";
 import "./Navbar.css";
 
 function SearchIcon() {
@@ -47,6 +47,7 @@ function Navbar() {
   const searchInputRef = useRef(null);
   const navigate = useNavigate();
   const { cartCount } = useCart();
+  const { products: allProducts } = useProductCatalog();
 
   useEffect(() => {
     previousScrollY.current = window.scrollY;
@@ -141,7 +142,8 @@ function Navbar() {
           <Link
             to="/login"
             className="header-action"
-            aria-label="Login"
+            aria-label="Account"
+            title="Account"
             onClick={scrollToTop}
           >
             <UserIcon />
@@ -203,13 +205,21 @@ function Navbar() {
                   <button
                     type="button"
                     className="navbar-search-result"
-                    key={`${product.category}-${product.id}`}
+                    key={product.routeId}
                     onClick={() => openProduct(product)}
                   >
                     <img src={product.image} alt="" />
                     <span>{product.name}</span>
                     <small>
-                      {product.category === "men" ? "Men" : "Women"}
+                      {product.category === "men"
+                        ? "Men"
+                        : product.category === "women"
+                          ? "Women"
+                          : product.category === "premium"
+                            ? "Premium"
+                            : product.category === "home"
+                              ? "Featured"
+                            : "New arrivals"}
                     </small>
                   </button>
                 ))

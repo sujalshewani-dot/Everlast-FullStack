@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useProductCatalog } from "../context/ProductContext";
 import "./PremiumEdition.css";
 
 export const premiumProducts = [
@@ -54,11 +55,19 @@ function formatPrice(price) {
 }
 
 export default function PremiumEdition() {
+  const {
+    products: catalogProducts,
+    loading: catalogLoading,
+    error: catalogError,
+  } = useProductCatalog();
+  const products = catalogProducts.filter(
+    (product) => product.category === "premium"
+  );
   const [availability, setAvailability] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
 
   const filteredProducts = useMemo(() => {
-    let result = [...premiumProducts];
+    let result = [...products];
 
     if (availability === "available") {
       result = result.filter((product) => !product.soldOut);
@@ -75,11 +84,13 @@ export default function PremiumEdition() {
     }
 
     return result;
-  }, [availability, sortBy]);
+  }, [availability, sortBy, products]);
 
   return (
     <main className="premium-collection">
       <h1 className="premium-title">PREMIUM EDITION</h1>
+      {catalogLoading && <p role="status">Loading products...</p>}
+      {catalogError && <p role="alert">{catalogError}</p>}
 
       <div className="premium-toolbar">
         <div className="premium-filters">
@@ -131,8 +142,8 @@ export default function PremiumEdition() {
         {filteredProducts.map((product) => (
           <Link
             className="premium-product-card"
-            key={product.id}
-            to={`/product/premium-${product.id}`}
+            key={product.routeId}
+            to={`/product/${product.routeId}`}
             aria-label={`View ${product.name}`}
           >
             <div className="premium-product-image">

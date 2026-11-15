@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+:root {
+    --restock-bar-height: 58px;
+}
+
 html {
     margin: 0;
     padding: 0;
@@ -125,6 +129,10 @@ main {
 /* Mobile */
 
 @media (max-width: 600px) {
+    :root {
+        --restock-bar-height: 36px;
+    }
+
     .men-collection,
     .women-collection {
         padding-top: 16px;

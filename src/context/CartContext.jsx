@@ -23,6 +23,11 @@ function readSavedCart() {
   }
 }
 
+function getStock(item) {
+  if (item.selectedSize === "110 ML") return Number(item.stock110);
+  return Number(item.stock55);
+}
+
 export function CartProvider({ children }) {
   const [items, setItems] = useState(readSavedCart);
 
@@ -35,21 +40,27 @@ export function CartProvider({ children }) {
   }, [items]);
 
   const addToCart = useCallback((product, quantity = 1) => {
-    if (!product || product.soldOut) return;
+    if (!product) return;
 
     const productKey = product.routeId || product.productId || product.id;
     const key = product.selectedSize
       ? `${productKey}-${product.selectedSize}`
       : productKey;
     const qty = Math.max(1, Math.floor(Number(quantity) || 1));
+    const stock = getStock(product);
+    if (Number.isFinite(stock) && stock < 1) return;
 
     setItems((current) => {
       const existing = current.find((item) => item.cartKey === key);
+      const requestedQuantity = existing ? existing.quantity + qty : qty;
+      const nextQuantity = Number.isFinite(stock)
+        ? Math.min(requestedQuantity, stock)
+        : requestedQuantity;
 
       if (existing) {
         return current.map((item) =>
           item.cartKey === key
-            ? { ...item, quantity: item.quantity + qty }
+            ? { ...item, quantity: nextQuantity }
             : item
         );
       }
@@ -59,7 +70,7 @@ export function CartProvider({ children }) {
         {
           ...product,
           cartKey: key,
-          quantity: qty,
+          quantity: nextQuantity,
         },
       ];
     });
@@ -77,11 +88,14 @@ export function CartProvider({ children }) {
     if (!Number.isFinite(qty) || qty < 1) return;
 
     setItems((current) =>
-      current.map((item) =>
-        item.cartKey === key
-          ? { ...item, quantity: qty }
-          : item
-      )
+      current.map((item) => {
+        if (item.cartKey !== key) return item;
+        const stock = getStock(item);
+        const nextQuantity = Number.isFinite(stock)
+          ? Math.min(qty, stock)
+          : qty;
+        return nextQuantity > 0 ? { ...item, quantity: nextQuantity } : item;
+      })
     );
   }, []);
 

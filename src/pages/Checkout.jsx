@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useProductCatalog } from "../context/ProductContext";
+import { apiRequest } from "../lib/api";
 import "./Checkout.css";
 
 const formatPrice = (price) =>
@@ -9,6 +11,7 @@ const formatPrice = (price) =>
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, cartTotal, clearCart } = useCart();
+  const { refreshCatalog } = useProductCatalog();
 
   const [form, setForm] = useState({
     email: "",
@@ -27,6 +30,7 @@ export default function Checkout() {
   });
 
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -36,7 +40,7 @@ export default function Checkout() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
@@ -71,8 +75,7 @@ export default function Checkout() {
       return;
     }
 
-    const order = {
-      orderNumber: `EV-${Date.now().toString().slice(-8)}`,
+    const orderRequest = {
       customer: {
         email: form.email.trim(),
         fullName: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
@@ -81,7 +84,6 @@ export default function Checkout() {
         address: form.address.trim(),
         postalCode: form.postalCode.trim(),
       },
-      paymentMethod: "Bank Deposit",
       billingAddress: form.billingAddress,
       billingDetails:
         form.billingAddress === "different"
@@ -92,28 +94,34 @@ export default function Checkout() {
             }
           : null,
       items: items.map((item) => ({
-        cartKey: item.cartKey,
-        name: item.name,
-        image: item.image,
-        price: Number(item.price),
+        productId: item.routeId || item.productId,
+        expectedPrice: Number(item.price),
         quantity: item.quantity,
-        selectedSize: item.selectedSize,
+        selectedSize: item.selectedSize || "55 ML",
       })),
-      subtotal: cartTotal,
-      total: cartTotal,
-      createdAt: new Date().toISOString(),
-      status: "Awaiting payment confirmation",
     };
 
+    setSubmitting(true);
     try {
-      sessionStorage.setItem("everlast-last-order", JSON.stringify(order));
-    } catch {
-      setError("Unable to save your order summary in this browser. Please try again.");
-      return;
-    }
+      const { data: order } = await apiRequest("/orders", {
+        method: "POST",
+        body: JSON.stringify(orderRequest),
+      });
 
-    clearCart();
-    navigate("/order-confirmation", { state: { order } });
+      try {
+        sessionStorage.setItem("everlast-last-order", JSON.stringify(order));
+      } catch {
+        // Navigation state still carries the order if session storage is unavailable.
+      }
+
+      clearCart();
+      refreshCatalog();
+      navigate("/order-confirmation", { state: { order } });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (items.length === 0) {
@@ -333,8 +341,12 @@ export default function Checkout() {
 
           {error && <p className="checkout-error">{error}</p>}
 
-          <button className="checkout-place-order" type="submit">
-            Complete order
+          <button
+            className="checkout-place-order"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? "Placing order..." : "Complete order"}
           </button>
 
           <Link to="/cart" className="checkout-back-link">

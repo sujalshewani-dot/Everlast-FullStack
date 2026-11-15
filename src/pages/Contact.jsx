@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiRequest } from "../lib/api";
 import "./Contact.css";
 
 export default function Contact() {
@@ -8,6 +9,9 @@ export default function Contact() {
     phone: "",
     comment: "",
   });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -18,19 +22,26 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Frontend testing only; connect a backend to send messages.
-    console.log("Contact form submitted:", formData);
-    alert("Thank you! Your message has been submitted.");
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
 
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      comment: "",
-    });
+    try {
+      const { message } = await apiRequest("/contact", {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+
+      setSuccess(message);
+      setFormData({ name: "", email: "", phone: "", comment: "" });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -88,8 +99,19 @@ export default function Contact() {
           </div>
         </div>
 
-        <button type="submit" className="submit-btn">
-          Send
+        {error && (
+          <p className="contact-form-message contact-form-error" role="alert">
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="contact-form-message" role="status">
+            {success}
+          </p>
+        )}
+
+        <button type="submit" className="submit-btn" disabled={submitting}>
+          {submitting ? "Sending..." : "Send"}
         </button>
       </form>
     </main>

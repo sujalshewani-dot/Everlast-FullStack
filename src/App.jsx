@@ -22,6 +22,9 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import CustomerAccount from "./pages/CustomerAccount";
+import Admin from "./pages/Admin";
+import { ProductProvider } from "./context/ProductContext";
 import "./App.css";
 
 function SimplePage({ title }) {
@@ -64,6 +67,7 @@ function ProductDetailsRoute() {
 function AppContent() {
   const location = useLocation();
   const isCheckout = location.pathname === "/checkout";
+  const isAdmin = location.pathname.startsWith("/admin");
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -71,7 +75,7 @@ function AppContent() {
 
   return (
     <>
-      {!isCheckout && (
+      {!isCheckout && !isAdmin && (
         <>
           <AnnouncementBar />
           <Navbar />
@@ -86,6 +90,7 @@ function AppContent() {
         <Route path="/new-arrivals" element={<NewArrivals />} />
         <Route path="/premium-signature" element={<PremiumEdition />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/admin/*" element={<Admin />} />
 
         <Route path="/product/:id" element={<ProductDetailsRoute />} />
 
@@ -96,7 +101,7 @@ function AppContent() {
           element={<OrderConfirmation />}
         />
 
-        <Route path="/login" element={<SimplePage title="Login" />} />
+        <Route path="/login" element={<CustomerAccount />} />
 
         <Route
           path="*"
@@ -104,11 +109,15 @@ function AppContent() {
         />
       </Routes>
 
-      {!isCheckout && <Footer />}
+      {!isCheckout && !isAdmin && <Footer />}
     </>
   );
 }
 
 export default function App() {
-  return <AppContent />;
+  return (
+    <ProductProvider>
+      <AppContent />
+    </ProductProvider>
+  );
 }

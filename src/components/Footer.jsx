@@ -1,8 +1,36 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { apiRequest } from "../lib/api";
 import "./Footer.css";
 
 function Footer() {
-return (
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterMessage, setNewsletterMessage] = useState("");
+  const [newsletterError, setNewsletterError] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
+
+  async function handleNewsletterSubmit(event) {
+    event.preventDefault();
+    setNewsletterMessage("");
+    setSubscribing(true);
+
+    try {
+      const { message } = await apiRequest("/newsletter", {
+        method: "POST",
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+      setNewsletterMessage(message);
+      setNewsletterError(false);
+      setNewsletterEmail("");
+    } catch (error) {
+      setNewsletterMessage(error.message);
+      setNewsletterError(true);
+    } finally {
+      setSubscribing(false);
+    }
+  }
+
+  return (
 <> <footer className="everlast-footer"> <div className="footer-description"> <p className="footer-brand-text"> <strong>At Everlast Fragrances,</strong> we believe every
 moment deserves a signature scent. Discover fragrances
 crafted to inspire confidence, express individuality,
@@ -34,21 +62,24 @@ and leave a lasting impression. </p>
       <div className="footer-newsletter">
         <h3>Sign Up To Receive Exclusive Offers</h3>
 
-        <form
-          className="footer-email-form"
-          onSubmit={(event) => event.preventDefault()}
-        >
+        <form className="footer-email-form" onSubmit={handleNewsletterSubmit}>
           <input
             type="email"
             placeholder="Email"
             aria-label="Email address"
             required
+            value={newsletterEmail}
+            onChange={(event) => setNewsletterEmail(event.target.value)}
+            disabled={subscribing}
           />
 
-          <button type="submit" aria-label="Subscribe">
-            →
+          <button type="submit" aria-label="Subscribe" disabled={subscribing}>
+            {subscribing ? "…" : "→"}
           </button>
         </form>
+        {newsletterMessage && (
+          <p role={newsletterError ? "alert" : "status"}>{newsletterMessage}</p>
+        )}
       </div>
     </div>
 
@@ -60,6 +91,7 @@ and leave a lasting impression. </p>
       <Link to="/terms">Terms of Service</Link>
       <Link to="/refund-policy">Refund Policy</Link>
       <Link to="/community">Join Everlast Community</Link>
+      <Link to="/admin">Admin</Link>
     </nav>
 
 
@@ -95,9 +127,9 @@ and leave a lasting impression. </p>
     <span className="whatsapp-symbol">◉</span>
     <span>Chat with us</span>
   </a>
-</>
+    </>
 
-);
+  );
 }
 
 export default Footer;

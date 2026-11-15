@@ -106,9 +106,13 @@ export default function OrderConfirmation() {
         </section>
 
         <p className="order-confirmation-disclaimer">
-          This is a demo checkout. The order has not been sent to a store
-          server, and no payment or delivery has been processed.
+          Your order has been received. Payment and delivery are confirmed
+          manually after you send the bank transfer receipt.
         </p>
+
+        <Link to="/login" className="confirmation-account-link">
+          View this and previous orders
+        </Link>
 
         <Link to="/" className="confirmation-continue-button">
           Continue Shopping

@@ -35,21 +35,21 @@ function AnnouncementBar() {
             ))}
           </div>
         </div>
+      </div>
 
-        <div className="ticker-placeholder">
-          <div className="restock-bar">
-            <div className="restock-track">
-              {Array.from({ length: 8 }, (_, index) => (
-                <span className="ticker-item" key={index}>
-                  OFFICE FOR MEN IS RESTOCKED
-                </span>
-              ))}
-            </div>
-
-            <Link to="/men#office-for-men" className="shop-now-button">
-              Shop now!
-            </Link>
+      <div className="ticker-placeholder">
+        <div className="restock-bar">
+          <div className="restock-track">
+            {Array.from({ length: 8 }, (_, index) => (
+              <span className="ticker-item" key={index}>
+                OFFICE FOR MEN IS RESTOCKED
+              </span>
+            ))}
           </div>
+
+          <Link to="/men" className="shop-now-button">
+            Shop now!
+          </Link>
         </div>
       </div>
     </>

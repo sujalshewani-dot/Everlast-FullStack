@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { allProducts, getProductByRouteId } from "../data/allProducts";
 import { useCart } from "../context/CartContext";
+import { useProductCatalog } from "../context/ProductContext";
 import "./ProductDetails.css";
 
 const formatPrice = (price) =>
@@ -11,13 +11,22 @@ export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, items } = useCart();
+  const { products, loading, error: catalogError } = useProductCatalog();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("55 ML");
   const [selectedImage, setSelectedImage] = useState("");
   const [shareMessage, setShareMessage] = useState("");
 
-  const product = getProductByRouteId(id);
+  const product = products.find((item) => item.routeId === id);
   const galleryImages = product ? [product.image] : [];
+
+  if (loading) {
+    return <main className="product-not-found"><p>Loading product...</p></main>;
+  }
+
+  if (catalogError) {
+    return <main className="product-not-found"><p role="alert">{catalogError}</p></main>;
+  }
 
   if (!product) {
     return (
@@ -29,7 +38,9 @@ export default function ProductDetails() {
     );
   }
 
-  const soldOut = Boolean(product.soldOut);
+  const selectedStock =
+    selectedSize === "110 ML" ? product.stock110 : product.stock55;
+  const soldOut = selectedStock < 1;
   const selectedPrice =
     selectedSize === "110 ML" ? product.price * 2 : product.price;
   const cartItem = items.find(
@@ -45,7 +56,7 @@ export default function ProductDetails() {
         : product.category === "new"
           ? "/new-arrivals"
           : "/men";
-  const relatedProducts = allProducts
+  const relatedProducts = products
     .filter(
       (item) =>
         item.routeId !== product.routeId &&
@@ -144,17 +155,21 @@ export default function ProductDetails() {
 
           <fieldset className="product-size-selector">
             <legend>Size</legend>
-            {["55 ML", "110 ML"].map((size) => (
+            {["55 ML", "110 ML"].map((size) => {
+              const stock = size === "110 ML" ? product.stock110 : product.stock55;
+              return (
               <button
                 type="button"
                 className={selectedSize === size ? "is-selected" : ""}
                 key={size}
                 onClick={() => setSelectedSize(size)}
                 aria-pressed={selectedSize === size}
+                disabled={stock < 1}
               >
                 {size}
               </button>
-            ))}
+              );
+            })}
           </fieldset>
 
           <div className="product-quantity product-details-quantity">
@@ -173,7 +188,7 @@ export default function ProductDetails() {
                 type="button"
                 aria-label="Increase quantity"
                 onClick={() => setQuantity((current) => current + 1)}
-                disabled={soldOut}
+                disabled={soldOut || quantity >= selectedStock}
               >
                 +
               </button>

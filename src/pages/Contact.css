@@ -99,6 +99,16 @@
     outline-offset: 3px;
 }
 
+.contact-form-message {
+    margin: 0;
+    color: #176b36;
+    font-size: 0.95rem;
+}
+
+.contact-form-error {
+    color: #b42318;
+}
+
 @media (max-width: 768px) {
     .contact-container {
         margin: 30px auto;
