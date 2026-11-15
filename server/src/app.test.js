@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
-import app from "./app.js";
+import app from "./httpApp.js";
 
 let server;
 let baseUrl;
@@ -46,56 +46,12 @@ test("unknown API routes return a JSON 404", async () => {
   assert.equal(body.success, false);
 });
 
-test("customer order history requires a customer session", async () => {
-  const previousSecret = process.env.CUSTOMER_SESSION_SECRET;
-  process.env.CUSTOMER_SESSION_SECRET = "test-only-customer-session-secret";
-
-  try {
-    const response = await fetch(`${baseUrl}/api/customer/orders`);
-    const body = await response.json();
-
-    assert.equal(response.status, 401);
-    assert.equal(body.message, "Please sign in to view your orders.");
-  } finally {
-    if (previousSecret === undefined) {
-      delete process.env.CUSTOMER_SESSION_SECRET;
-    } else {
-      process.env.CUSTOMER_SESSION_SECRET = previousSecret;
-    }
-  }
-});
-
-test("customer code requests clearly require configured email delivery", async () => {
-  const keys = [
-    "CUSTOMER_SESSION_SECRET",
-    "JWT_SECRET",
-    "SMTP_HOST",
-    "SMTP_PORT",
-    "SMTP_USER",
-    "SMTP_PASS",
-    "SMTP_FROM",
-  ];
-  const previous = Object.fromEntries(
-    keys.map((key) => [key, process.env[key]])
-  );
-  keys.forEach((key) => {
-    process.env[key] = "";
+test("customer email-code endpoints are no longer available", async () => {
+  const response = await fetch(`${baseUrl}/api/customer/request-code`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: "shopper@example.com" }),
   });
 
-  try {
-    const response = await fetch(`${baseUrl}/api/customer/request-code`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "shopper@example.com" }),
-    });
-    const body = await response.json();
-
-    assert.equal(response.status, 503);
-    assert.match(body.message, /Configure SMTP/);
-  } finally {
-    keys.forEach((key) => {
-      if (previous[key] === undefined) delete process.env[key];
-      else process.env[key] = previous[key];
-    });
-  }
+  assert.equal(response.status, 404);
 });

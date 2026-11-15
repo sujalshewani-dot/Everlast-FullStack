@@ -93,12 +93,3 @@ export function readAdminSession(token, secret) {
     : null;
 }
 
-export function createCustomerSession(email, secret) {
-  return createSession(email, secret, "customer");
-}
-
-export function readCustomerSession(token, secret) {
-  const claims = readSession(token, secret);
-  return claims?.role === "customer" ? claims : null;
-}
-

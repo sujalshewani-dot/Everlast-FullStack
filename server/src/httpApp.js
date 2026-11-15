@@ -6,7 +6,6 @@ import { isDatabaseConnected } from "./config/db.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import customerRoutes from "./routes/customerRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
@@ -74,7 +73,6 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/admin", authRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/customer", customerRoutes);
 app.use("/api", submissionRoutes);
 
 app.use((req, res) => {

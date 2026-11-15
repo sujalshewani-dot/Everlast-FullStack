@@ -139,14 +139,6 @@
     text-decoration: none;
 }
 
-.confirmation-account-link {
-    display: block;
-    margin-top: 20px;
-    color: #333;
-    font-size: 13px;
-    text-align: center;
-}
-
 .confirmation-continue-button:hover {
     background: #383838;
 }

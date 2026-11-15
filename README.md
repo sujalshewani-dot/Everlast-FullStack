@@ -31,21 +31,6 @@ stock at checkout. Inventory is deducted transactionally only when an
 administrator confirms payment; cancelling a confirmed order restores its stock.
 The 110 ML price is always twice the 55 ML price.
 
-### Customer order history sign-in
-
-Customers sign in with a one-time code sent to the email address used at
-checkout. Their account page shows only order numbers, items, totals, dates,
-and statuses; it does not show delivery addresses or phone numbers.
-
-To enable code delivery, create a Brevo account, verify the sender address (and
-your domain for production), then copy the SMTP host, port, username, SMTP key,
-and verified sender into `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and
-`SMTP_FROM` in the private `server/.env`. Use the SMTP key as the password.
-Never put these values in frontend environment variables or share them in chat.
-Run `npm run admin:setup` if you have not already configured the admin; it also
-creates the customer-session signing secret. Restart the backend after updating
-`.env`. Codes expire after 10 minutes and customer sessions after 8 hours.
-
 The backend inserts the current 82 storefront listings on first startup without
 overwriting existing product records. Seeded available items start with 10 units
 per size, while existing sold-out items start at zero; review the inventory in
@@ -55,7 +40,7 @@ Admin before accepting real orders.
 
 From an interactive terminal in `server/`, run `npm run admin:setup`. It asks
 for an email and a password twice (password input is hidden), then stores the
-password hash and random session secrets in the local `.env` without printing
+password hash and random admin session secret in the local `.env` without printing
 them. Admin sessions expire after eight hours and are held in browser
 `sessionStorage`. Do not commit `.env` or send the password in chat. Open
 `/admin` to sign in. There is no public admin registration endpoint.
@@ -68,10 +53,11 @@ was confirmed). Payment still uses the existing manual bank-transfer process.
 
 Run backend tests with `npm test` from `server/`.
 
-## Deploy frontend and backend
+## Deploy frontend and backend to Vercel
 
-The frontend is configured for Vercel and the API for Render. MongoDB Atlas
-should be used for the production database.
+Deploy this repository as two Vercel projects: the frontend uses the repository
+root, and the Express backend uses `server/` as its root directory. MongoDB
+Atlas is the production database.
 
 ### Keep environment values private
 
@@ -81,45 +67,41 @@ should be used for the production database.
   public and must never contain secrets.
 - Backend local values belong in the ignored `server/.env`; use
   `server/.env.example` as the template. In production, add backend values in
-  Render's Environment dashboard. Do not commit either private env file.
+  the backend Vercel project's Environment Variables settings. Do not commit
+  either private env file.
 
-### Render API
+1. Push the project to GitHub and create the frontend Vercel project with the
+   repository root as its Root Directory. Keep the build command `npm run
+   build` and output directory `dist`, as configured in `vercel.json`. Deploy
+   once to get the frontend domain.
+2. Create a second Vercel project from the same repository and set its Root
+   Directory to `server`. Vercel deploys the Express app in `server/index.js`
+   as a function. Add these backend environment variables in its settings:
+   `MONGODB_URI` (your Atlas connection string), `CLIENT_ORIGIN` (the exact
+   frontend origin, such as `https://your-site.vercel.app`),
+   `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, and `JWT_SECRET`.
+3. If you have not configured the admin yet, run `npm run admin:setup` from
+   `server/` in an interactive terminal. Copy the generated `ADMIN_EMAIL`,
+   `ADMIN_PASSWORD_HASH`, and `JWT_SECRET` values from the private local
+   `server/.env` into the backend project's Vercel settings. Do not deploy or
+   share that file.
+4. In the MongoDB Atlas Network Access settings, allow connections from your
+   backend. Use Vercel static egress IPs if available for your plan; otherwise
+   an IP allowlist entry of `0.0.0.0/0` may be needed because serverless
+   outbound IPs can change. Protect Atlas with a strong, unique database
+   password and never expose the connection string in frontend variables.
+5. Deploy the backend and check
+   `https://YOUR-BACKEND.vercel.app/api/health` for `{"success":true,"status":"ok"}`.
+6. In the frontend Vercel project, set the production variable
+   `VITE_API_URL` to `https://YOUR-BACKEND.vercel.app/api`, then redeploy the
+   frontend. If you use preview or custom frontend domains, add their exact
+   origins to `CLIENT_ORIGIN` as comma-separated values.
 
-1. Push the repository to GitHub and create a Render Blueprint from it. The
-   root `render.yaml` configures the service to run from `server/`, use
-   `npm install` / `npm start`, and check `/api/health`.
-2. Set the private environment values in Render:
-   `MONGODB_URI` (your Atlas connection string), `ADMIN_EMAIL`,
-   `ADMIN_PASSWORD_HASH`, `JWT_SECRET`, and `CUSTOMER_SESSION_SECRET`.
-   Generate or retrieve the admin hash and signing secrets with the
-   `admin:setup` workflow above; never put the password itself in Render's
-   `ADMIN_PASSWORD_HASH` field. Set `CLIENT_ORIGIN` to
-   `http://localhost:5173` temporarily if you have not deployed the frontend
-   yet; replace it with the Vercel site origin after step 3.
-3. Add `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_FROM` to
-   Render if customer email sign-in is enabled. Use Brevo's SMTP key as the
-   password. Render supplies `PORT`.
-4. Deploy and wait for `/api/health` to report `ok`.
-
-The Blueprint uses Render's free plan to avoid unexpected charges. Free
-services can sleep when idle; choose a paid plan if the API needs to stay
-available without cold starts.
-
-### Vercel frontend
-
-1. Import the GitHub repository into Vercel with the repository root as the
-   project root. Use `npm run build` as the build command and `dist` as the
-   output directory.
-2. Set the production environment variable `VITE_API_URL` to
-   `https://YOUR-RENDER-SERVICE.onrender.com/api`, using the actual Render
-   service URL.
-3. Deploy the frontend, then set Render's `CLIENT_ORIGIN` to the exact
-   `https://` origin of the deployed Vercel site. Redeploy/restart the API
-   after changing that value.
-
-The Vercel rewrite in `vercel.json` supports direct navigation to frontend
-routes. After deployment, test the storefront, `/admin`, API health, and a
-test checkout. Review seeded inventory before accepting real orders.
+The backend has no SMTP or customer email-code sign-in requirement. The
+customer-account/order-history login has been removed; customers can still
+place orders and provide their delivery contact details. Test the storefront,
+`/admin`, API health, and a test checkout after both projects deploy. Review
+seeded inventory before accepting real orders.
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 

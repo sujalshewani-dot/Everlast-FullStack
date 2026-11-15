@@ -84,7 +84,6 @@ async function main() {
     ADMIN_EMAIL: email.toLowerCase(),
     ADMIN_PASSWORD_HASH: await hashAdminPassword(password),
     JWT_SECRET: randomBytes(48).toString("hex"),
-    CUSTOMER_SESSION_SECRET: randomBytes(48).toString("hex"),
   };
   const contents = Object.entries(updates).reduce(
     (current, [name, value]) => setEnvValue(current, name, value),

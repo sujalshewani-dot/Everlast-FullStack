@@ -16,17 +16,6 @@ function SearchIcon() {
   );
 }
 
-function UserIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="24" height="24"
-      fill="none" stroke="currentColor" strokeWidth="1.3"
-      aria-hidden="true">
-      <circle cx="12" cy="7" r="4" />
-      <path d="M4 21c0-4.3 3.5-7 8-7s8 2.7 8 7" />
-    </svg>
-  );
-}
-
 function BagIcon() {
   return (
     <svg viewBox="0 0 24 24" width="26" height="26"
@@ -139,15 +128,6 @@ function Navbar() {
         </Link>
 
         <div className="header-actions">
-          <Link
-            to="/login"
-            className="header-action"
-            aria-label="Account"
-            title="Account"
-            onClick={scrollToTop}
-          >
-            <UserIcon />
-          </Link>
           <Link
             to="/cart"
             className="header-action"

@@ -9,6 +9,7 @@ export async function connectDB() {
 
   await mongoose.connect(uri, {
     serverSelectionTimeoutMS: 10000,
+    maxPoolSize: 5,
   });
 
   console.log(`MongoDB connected: ${mongoose.connection.host}`);

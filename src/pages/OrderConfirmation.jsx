@@ -110,10 +110,6 @@ export default function OrderConfirmation() {
           manually after you send the bank transfer receipt.
         </p>
 
-        <Link to="/login" className="confirmation-account-link">
-          View this and previous orders
-        </Link>
-
         <Link to="/" className="confirmation-continue-button">
           Continue Shopping
         </Link>

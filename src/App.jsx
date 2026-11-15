@@ -22,7 +22,6 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
-import CustomerAccount from "./pages/CustomerAccount";
 import Admin from "./pages/Admin";
 import { ProductProvider } from "./context/ProductContext";
 import "./App.css";
@@ -100,8 +99,6 @@ function AppContent() {
           path="/order-confirmation"
           element={<OrderConfirmation />}
         />
-
-        <Route path="/login" element={<CustomerAccount />} />
 
         <Route
           path="*"

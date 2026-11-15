@@ -149,7 +149,6 @@ export default function Checkout() {
         <section className="checkout-form-panel">
           <div className="checkout-section-heading">
             <h1>Contact</h1>
-            <span>Already have an account? <Link to="/login">Sign in</Link></span>
           </div>
           <label className="checkout-sr-only" htmlFor="email">Email or mobile phone number</label>
           <input

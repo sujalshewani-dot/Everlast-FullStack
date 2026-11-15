@@ -291,12 +291,6 @@
     font-weight: 500;
 }
 
-.checkout-section-heading span,
-.checkout-section-heading a {
-    color: #555;
-    font-size: 11px;
-}
-
 .checkout-section-title {
     margin: 22px 0 9px;
     font-size: 16px;
