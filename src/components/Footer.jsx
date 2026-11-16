@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { apiRequest } from "../lib/api";
+import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_URL } from "../lib/contact";
 import "./Footer.css";
 
 function Footer() {
@@ -51,11 +52,11 @@ and leave a lasting impression. </p>
       <p className="footer-contact">
         Contact us at whatsapp no:{" "}
         <a
-          href="https://wa.me/923283383607"
+          href={WHATSAPP_URL}
           target="_blank"
           rel="noreferrer"
         >
-          03283383607
+          {WHATSAPP_DISPLAY_NUMBER}
         </a>
       </p>
 
@@ -120,7 +121,7 @@ and leave a lasting impression. </p>
 
   <a
     className="whatsapp-chat"
-    href="https://wa.me/923283383607"
+    href={WHATSAPP_URL}
     target="_blank"
     rel="noreferrer"
   >

@@ -1,4 +1,5 @@
 import { Link, useLocation, Navigate } from "react-router-dom";
+import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_URL } from "../lib/contact";
 import "./OrderConfirmation.css";
 
 const formatPrice = (price) =>
@@ -63,13 +64,13 @@ export default function OrderConfirmation() {
             payment receipt on WhatsApp.
           </p>
           <a
-            href={`https://wa.me/923103808186?text=${encodeURIComponent(
+            href={`${WHATSAPP_URL}?text=${encodeURIComponent(
               `Order ID: ${order.orderNumber}. Total: PKR ${Number(order.total).toLocaleString("en-PK")}. I am sending my payment receipt.`
             )}`}
             target="_blank"
             rel="noreferrer"
           >
-            WhatsApp: +92 310 3808186
+            WhatsApp: {WHATSAPP_DISPLAY_NUMBER}
           </a>
           <p>All orders will be delivered within 5 to 7 working days!</p>
           <p>No Cash on Delivery — Advanced Payments Only.</p>

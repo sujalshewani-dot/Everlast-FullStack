@@ -8,6 +8,10 @@ function BestSeller() {
     products.find((item) => item.routeId === "men-5") ||
     products.find((item) => item.category === "men");
   if (!product) return null;
+  const mainImage =
+    product.routeId === "men-5"
+      ? "/images/products/office-for-men-main.png"
+      : product.image;
 
   return (
     <section className="top-seller-section">
@@ -26,7 +30,7 @@ function BestSeller() {
             aria-label={`View ${product.name}`}
           >
             <img
-              src={product.image}
+              src={mainImage}
               alt={product.name}
             />
           </Link>

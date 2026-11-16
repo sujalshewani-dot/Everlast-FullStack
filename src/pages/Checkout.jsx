@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useProductCatalog } from "../context/ProductContext";
 import { apiRequest } from "../lib/api";
+import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_URL } from "../lib/contact";
 import "./Checkout.css";
 
 const formatPrice = (price) =>
@@ -276,11 +277,11 @@ export default function Checkout() {
                 and payment receipt on WhatsApp:
                 {" "}
                 <a
-                  href="https://wa.me/923103808186"
+                  href={WHATSAPP_URL}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  +92 310 3808186
+                  {WHATSAPP_DISPLAY_NUMBER}
                 </a>
               </p>
               <p>ALL ORDERS WILL BE DELIVERED WITHIN 5 TO 7 WORKING DAYS!</p>
