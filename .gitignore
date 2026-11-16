@@ -10,11 +10,21 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
+.vite
+.cache
+*.tsbuildinfo
 *.local
 .vercel
 .env
 .env.*
 !.env.example
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
 
 # Editor directories and files
 .vscode/*
